@@ -1,54 +1,42 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:workout/views/login_page.dart';
+import 'login_page.dart';
 
-class SignUpPage extends StatefulWidget {
-  const SignUpPage({super.key});
+class PhoneSignupPage extends StatefulWidget {
+  final String number;
+  const PhoneSignupPage({super.key, required this.number});
 
   @override
-  State<SignUpPage> createState() => _SignUpPageState();
+  State<PhoneSignupPage> createState() => _PhoneSignupPageState();
 }
 
-class _SignUpPageState extends State<SignUpPage> {
+class _PhoneSignupPageState extends State<PhoneSignupPage> {
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
   final _ageController = TextEditingController();
-  final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-
   bool isLoading = false;
 
-  Future signUp() async {
+
+  Future<void> signUp() async {
     setState(() {
       isLoading = true;
     });
     try {
-      UserCredential userCredential = await FirebaseAuth.instance
-          .createUserWithEmailAndPassword(
-              email: _emailController.text.trim(),
-              password: _passwordController.text.trim());
-
-      addDetails(
-        _firstNameController.text.trim(),
-        _lastNameController.text.trim(),
-        int.parse(_ageController.text.trim()),
-        _emailController.text.trim(),
-      );
+      await FirebaseAuth.instance.createUserWithEmailAndPassword(email: "${widget.number}@gmail.com", password: _passwordController.text.trim());
+      addDetails();
       setState(() {
         isLoading = false;
       });
-      if (userCredential != null) {
-        await userCredential.user?.sendEmailVerification();
-      }
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         backgroundColor: Colors.grey[700],
         content:
-            Center(child: Text("Signup Successful, Check Verification Email",style: GoogleFonts.quicksand(
-                  fontSize: 14, fontWeight: FontWeight.bold),
-            ),),
+        Center(child: Text("Signup Successful",style: GoogleFonts.quicksand(
+            fontSize: 14, fontWeight: FontWeight.bold),
+        ),),
         duration: const Duration(seconds: 2),
       ));
       await Future.delayed(const Duration(seconds: 2));
@@ -56,7 +44,7 @@ class _SignUpPageState extends State<SignUpPage> {
           context,
           MaterialPageRoute(
               builder: (context) => const LoginPage()));
-    } catch (e) {
+    } catch (e){
       setState(() {
         isLoading = false;
       });
@@ -70,48 +58,32 @@ class _SignUpPageState extends State<SignUpPage> {
       ));
     }
   }
-
-  Future addDetails(
-      String firstName, String lastName, int age, String email) async {
+  Future<void> addDetails () async {
     await FirebaseFirestore.instance.collection('users').add({
-      'first name': firstName,
-      'last name': lastName,
-      'age': age,
-      'email': email,
+      'first name': _firstNameController.text.trim(),
+      'last name': _lastNameController.text.trim(),
+      'age': _ageController.text.trim(),
+      'phone number': widget.number.toString(),
     });
   }
-
   @override
   void dispose() {
     _firstNameController.dispose();
     _lastNameController.dispose();
     _ageController.dispose();
-    _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.grey[50],
-        elevation: 0,
-        leading: IconButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          icon: const Icon(
-            Icons.arrow_back,
-          ),
-          color: Colors.grey[700],
-        ),
-      ),
+      appBar: AppBar(),
       body: Center(
         child: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 25),
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 SizedBox(
                     height: 200, child: SvgPicture.asset('assets/sign_up.svg')),
@@ -127,6 +99,28 @@ class _SignUpPageState extends State<SignUpPage> {
                           fontSize: 34, fontWeight: FontWeight.bold),
                     ),
                   ],
+                ),
+                const SizedBox(
+                  height: 20,
+                ),
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    color: Colors.grey[200],
+                    border: Border.all(width: 1, color: Colors.grey),
+                  ),
+                  height: 40,
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 10),
+                    child: TextField(
+                      enabled: false,
+                      textInputAction: TextInputAction.next,
+                      decoration: InputDecoration(
+                        hintText: widget.number,
+                        border: InputBorder.none,
+                      ),
+                    ),
+                  ),
                 ),
                 const SizedBox(
                   height: 20,
@@ -208,28 +202,6 @@ class _SignUpPageState extends State<SignUpPage> {
                   child: Padding(
                     padding: const EdgeInsets.only(left: 10),
                     child: TextField(
-                      textInputAction: TextInputAction.next,
-                      controller: _emailController,
-                      decoration: const InputDecoration(
-                        hintText: 'Email',
-                        border: InputBorder.none,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(
-                  height: 20,
-                ),
-                Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    color: Colors.grey[200],
-                    border: Border.all(width: 1, color: Colors.grey),
-                  ),
-                  height: 40,
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 10),
-                    child: TextField(
                       obscureText: true,
                       controller: _passwordController,
                       decoration: const InputDecoration(
@@ -256,15 +228,15 @@ class _SignUpPageState extends State<SignUpPage> {
                     child: Center(
                         child: isLoading
                             ? const CircularProgressIndicator(
-                                color: Colors.white,
-                              )
+                          color: Colors.white,
+                        )
                             : Text(
-                                "Continue",
-                                style: GoogleFonts.quicksand(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white),
-                              )),
+                          "Continue",
+                          style: GoogleFonts.quicksand(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white),
+                        )),
                   ),
                 ),
               ],

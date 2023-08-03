@@ -2,7 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:pinput/pinput.dart';
-import 'package:workout/views/home_page.dart';
+import 'package:workout/views/phone_signup_page.dart';
 
 class PhoneVerificationPage extends StatefulWidget {
   final String phoneNumber;
@@ -32,7 +32,7 @@ class _PhoneVerificationPageState extends State<PhoneVerificationPage> {
       setState(() {
         isLoading = false;
       });
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => HomePage()));
+      Navigator.push(context, MaterialPageRoute(builder: (context) => PhoneSignupPage(number: widget.phoneNumber,)));
     } catch (e) {
       setState(() {
         isLoading = false;
@@ -98,6 +98,7 @@ class _PhoneVerificationPageState extends State<PhoneVerificationPage> {
                 pinputAutovalidateMode: PinputAutovalidateMode.onSubmit,
                 validator: (s) {
                   smsCode = s!;
+                  return null;
                 },
                 showCursor: false,
               ),

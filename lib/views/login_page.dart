@@ -2,8 +2,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:workout/auth/forgot_password_page.dart';
-import 'package:workout/auth/phone_login_page.dart';
+import 'package:workout/views/forgot_password_page.dart';
+import 'package:workout/views/phone_login_page.dart';
 import 'package:workout/views/home_page.dart';
 import 'package:workout/views/signup_page.dart';
 
@@ -17,7 +17,7 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-
+  bool isVisible = true;
   bool isLoading = false;
 
   Future<void> logIn() async {
@@ -26,7 +26,7 @@ class _LoginPageState extends State<LoginPage> {
     });
     try {
       await FirebaseAuth.instance.signInWithEmailAndPassword(
-          email: _emailController.text.trim(),
+          email: checkEmail()!,
           password: _passwordController.text.trim());
       setState(() {
         isLoading = false;
@@ -38,6 +38,13 @@ class _LoginPageState extends State<LoginPage> {
       });
     }
 
+  }
+  String? checkEmail(){
+    if(_emailController.text.trim().contains('@')){
+      return _emailController.text.trim();
+    } else {
+      return "${_emailController.text.trim()}@gmail.com";
+    }
   }
 
   @override
@@ -76,15 +83,22 @@ class _LoginPageState extends State<LoginPage> {
                 TextFormField(
                   controller: _emailController,
                   decoration: const InputDecoration(
-                      icon: Icon(Icons.alternate_email), hintText: 'Email'),
+                      icon: Icon(Icons.alternate_email), hintText: 'Email / Phone Number'),
                 ),
                 const SizedBox(
                   height: 15,
                 ),
                 TextFormField(
+                  obscureText: isVisible,
                   controller: _passwordController,
-                  decoration: const InputDecoration(
-                      icon: Icon(Icons.lock_outline), hintText: 'Password'),
+                  decoration: InputDecoration(
+                      icon: const Icon(Icons.lock_outline), hintText: 'Password',
+                  suffixIcon: IconButton(onPressed: (){
+                    setState(() {
+                      isVisible = !isVisible;
+                    });
+                  }, icon: isVisible? const Icon(Icons.visibility_off) : const Icon(Icons.visibility))
+                  ),
                 ),
                 const SizedBox(
                   height: 15,
@@ -183,7 +197,7 @@ class _LoginPageState extends State<LoginPage> {
                           width: 5,
                         ),
                         Text(
-                          "Login with Phone Number",
+                          "Register with Phone Number",
                           style: GoogleFonts.quicksand(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,

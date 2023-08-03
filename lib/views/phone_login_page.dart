@@ -2,7 +2,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
-import 'package:workout/auth/phone_verification_page.dart';
+import 'package:workout/views/login_page.dart';
+import 'package:workout/views/phone_verification_page.dart';
 
 class PhoneLoginPage extends StatefulWidget {
   const PhoneLoginPage({super.key});
@@ -103,7 +104,7 @@ class _PhoneLoginPageState extends State<PhoneLoginPage> {
                               color: Colors.white,
                             )
                           : Text(
-                              "Send the Code",
+                              "Send Code",
                               style: GoogleFonts.quicksand(
                                   fontSize: 20,
                                   fontWeight: FontWeight.bold,
@@ -126,7 +127,7 @@ class _PhoneLoginPageState extends State<PhoneLoginPage> {
                   ),
                   InkWell(
                     onTap: () {
-                      Navigator.pop(context);
+                      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const LoginPage()));
                     },
                     child: Text(
                       "Login",

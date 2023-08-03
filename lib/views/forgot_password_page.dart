@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:workout/views/login_page.dart';
 
 class ForgotPasswordPage extends StatefulWidget {
   const ForgotPasswordPage({super.key});
@@ -24,13 +25,16 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
       setState(() {
         isLoading = false;
       });
-      showDialog(
-          context: context, builder: (context) {
-        return const AlertDialog(
-          content: Text("Password reset link sent!"),
-        );
-      }
-      );
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        backgroundColor: Colors.grey[700],
+        content:
+        Center(child: Text("Password reset link sent!",style: GoogleFonts.quicksand(
+            fontSize: 14, fontWeight: FontWeight.bold),
+        ),),
+        duration: const Duration(seconds: 2),
+      ));
+      await Future.delayed(const Duration(seconds: 2));
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => LoginPage()));
     } on FirebaseAuthException catch (e) {
       setState(() {
         isLoading = false;
