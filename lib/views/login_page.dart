@@ -25,13 +25,28 @@ class _LoginPageState extends State<LoginPage> {
       isLoading = true;
     });
     try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
+      UserCredential credential =  await FirebaseAuth.instance.signInWithEmailAndPassword(
           email: checkEmail()!,
           password: _passwordController.text.trim());
+      User? user = credential.user;
       setState(() {
         isLoading = false;
       });
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => HomePage()));
+      if (user != null) {
+        if (user.emailVerified) {
+          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => HomePage()));
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            backgroundColor: Colors.grey[700],
+            content:
+            Center(child: Text("Account not Verified",style: GoogleFonts.quicksand(
+                fontSize: 14, fontWeight: FontWeight.bold),
+            ),),
+            duration: const Duration(seconds: 2),
+          ));
+          // You can navigate to a screen that prompts the user to verify their email
+        }
+      }
     } catch (e){
       setState(() {
         isLoading = false;
