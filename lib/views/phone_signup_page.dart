@@ -28,7 +28,7 @@ class _PhoneSignupPageState extends State<PhoneSignupPage> {
     });
     try {
       await FirebaseAuth.instance.createUserWithEmailAndPassword(email: "${widget.number}@gmail.com", password: _passwordController.text.trim());
-      addDetails();
+      await addDetails();
       setState(() {
         isLoading = false;
       });

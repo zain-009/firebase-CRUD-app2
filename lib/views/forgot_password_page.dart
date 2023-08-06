@@ -108,10 +108,10 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
         });
       }
       if (phoneNumberExists == true){
-        setState(() {
-          isLoading = true;
-        });
         try {
+          setState(() {
+            isLoading = true;
+          });
           FirebaseAuth.instance.verifyPhoneNumber(
               phoneNumber: phoneNumber,
               verificationCompleted: (_) {},
@@ -125,7 +125,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                 setState(() {
                   isLoading = false;
                 });
-                Navigator.push(context, MaterialPageRoute(builder: (context) => PhoneVerificationPage(verificationId: verificationId,phoneNumber: phoneNumber,fromPhonePasswordReset: true,)));
+                Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => PhoneVerificationPage(verificationId: verificationId,phoneNumber: phoneNumber,fromPhonePasswordReset: true,)));
               },
               codeAutoRetrievalTimeout: (_){}
           );

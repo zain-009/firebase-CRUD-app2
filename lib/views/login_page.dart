@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:workout/views/forgot_password_page.dart';
+import 'package:workout/views/phone_password_reset_page.dart';
 import 'package:workout/views/phone_register_page.dart';
 import 'package:workout/views/home_page.dart';
 import 'package:workout/views/signup_page.dart';
@@ -298,6 +299,19 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                   ],
+                ),
+                SizedBox(height: 40,),
+                GestureDetector(
+                  onTap: (){
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => PhonePasswordResetPage()));
+                  },
+                  child: Text(
+                    "reset",
+                    style: GoogleFonts.quicksand(
+                      //fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.blue),
+                  ),
                 ),
               ],
             ),
