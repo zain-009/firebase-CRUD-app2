@@ -40,8 +40,7 @@ class _PhoneSignupPageState extends State<PhoneSignupPage> {
         ),),
         duration: const Duration(seconds: 2),
       ));
-      await Future.delayed(const Duration(seconds: 2));
-      Navigator.push(
+      Navigator.pushReplacement(
           context,
           MaterialPageRoute(
               builder: (context) => const LoginPage()));

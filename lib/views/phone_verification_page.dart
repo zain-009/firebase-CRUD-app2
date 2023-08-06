@@ -2,15 +2,16 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:pinput/pinput.dart';
+import 'package:workout/views/phone_password_reset_page.dart';
 import 'package:workout/views/phone_signup_page.dart';
 
 class PhoneVerificationPage extends StatefulWidget {
   final String phoneNumber;
   final String verificationId;
-  final bool fromPhonePasswordReset = false;
+  final bool fromPhonePasswordReset;
 
   const PhoneVerificationPage(
-      {super.key, required this.verificationId, required this.phoneNumber});
+      {super.key, required this.verificationId, required this.phoneNumber, this.fromPhonePasswordReset = false});
 
   @override
   State<PhoneVerificationPage> createState() => _PhoneVerificationPageState();
@@ -33,7 +34,11 @@ class _PhoneVerificationPageState extends State<PhoneVerificationPage> {
       setState(() {
         isLoading = false;
       });
-      Navigator.push(context, MaterialPageRoute(builder: (context) => PhoneSignupPage(number: widget.phoneNumber,)));
+      if(widget.fromPhonePasswordReset) {
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => PhonePasswordResetPage()));
+      } else {
+        Navigator.push(context, MaterialPageRoute(builder: (context) => PhoneSignupPage(number: widget.phoneNumber,)));
+      }
     } catch (e) {
       setState(() {
         isLoading = false;

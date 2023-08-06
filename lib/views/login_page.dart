@@ -183,7 +183,18 @@ class _LoginPageState extends State<LoginPage> {
                 ),
                 GestureDetector(
                   onTap: (){
-                    logIn();
+                    if(_emailController.text.isNotEmpty && _passwordController.text.isNotEmpty) {
+                      logIn();
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                        backgroundColor: Colors.grey[700],
+                        content:
+                        Center(child: Text("Please fill out the details!",style: GoogleFonts.quicksand(
+                            fontSize: 14, fontWeight: FontWeight.bold),
+                        ),),
+                        duration: const Duration(seconds: 2),
+                      ));
+                    }
                   },
                   child: Container(
                     decoration: BoxDecoration(

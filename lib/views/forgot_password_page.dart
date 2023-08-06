@@ -16,6 +16,7 @@ class ForgotPasswordPage extends StatefulWidget {
 class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   final _emailController = TextEditingController();
   final _phoneNumberController = TextEditingController();
+  bool phoneNumberExists = true;
   bool isLoading = false;
   var phoneNumber = "";
 
@@ -64,35 +65,23 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     }
   }
 
-  Future<void> phonePasswordReset () async {
-    setState(() {
-      isLoading = true;
-    });
+  Future <void> phoneNumberCheck () async {
     try {
-      await FirebaseAuth.instance.verifyPhoneNumber(
-          phoneNumber: phoneNumber,
-          verificationCompleted: (_) {},
-          verificationFailed: (e) {
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-              content: Text(e.toString()),
-              duration: const Duration(seconds: 2),
-            ));
-          },
-          codeSent: (String verificationId, int? token){
-            setState(() {
-              isLoading = false;
-            });
-            Navigator.push(context, MaterialPageRoute(builder: (context) => PhoneVerificationPage(verificationId: verificationId,phoneNumber: phoneNumber,)));
-          },
-          codeAutoRetrievalTimeout: (_){}
-      );
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: "$phoneNumber@gmail.com", password: "x");
     } catch (e) {
-      if(e is FirebaseAuthException) {
-
+      if (e is FirebaseAuthException) {
+        if (e.code == 'user-not-found') {
+          setState(() {
+            phoneNumberExists = false;
+          });
+        }
+        if(e.code == 'wrong-password') {
+          setState(() {
+            phoneNumberExists = true;
+          });
+        }
       }
-      setState(() {
-        isLoading = false;
-      });
     }
   }
 
@@ -100,7 +89,55 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     if(_emailController.text.isNotEmpty && _phoneNumberController.text.isEmpty) {
       emailPasswordReset();
     } else if(_phoneNumberController.text.isNotEmpty && _emailController.text.isEmpty) {
-      phonePasswordReset();
+      setState(() {
+        isLoading = true;
+      });
+      await phoneNumberCheck();
+      if (phoneNumberExists == false) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          backgroundColor: Colors.grey[700],
+          content:
+          Center(
+            child: Text("Incorrect Phone Number!", style: GoogleFonts.quicksand(
+                fontSize: 14, fontWeight: FontWeight.bold),
+            ),),
+          duration: const Duration(seconds: 2),
+        ));
+        setState(() {
+          isLoading = false;
+        });
+      }
+      if (phoneNumberExists == true){
+        setState(() {
+          isLoading = true;
+        });
+        try {
+          FirebaseAuth.instance.verifyPhoneNumber(
+              phoneNumber: phoneNumber,
+              verificationCompleted: (_) {},
+              verificationFailed: (e) {
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  content: Text(e.toString()),
+                  duration: const Duration(seconds: 2),
+                ));
+              },
+              codeSent: (String verificationId, int? token){
+                setState(() {
+                  isLoading = false;
+                });
+                Navigator.push(context, MaterialPageRoute(builder: (context) => PhoneVerificationPage(verificationId: verificationId,phoneNumber: phoneNumber,fromPhonePasswordReset: true,)));
+              },
+              codeAutoRetrievalTimeout: (_){}
+          );
+        } catch (e) {
+          setState(() {
+            isLoading = false;
+          });
+        }
+        setState(() {
+          isLoading = false;
+        });
+      }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         backgroundColor: Colors.grey[700],
