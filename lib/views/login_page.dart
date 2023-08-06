@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:workout/views/forgot_password_page.dart';
-import 'package:workout/views/phone_login_page.dart';
+import 'package:workout/views/phone_register_page.dart';
 import 'package:workout/views/home_page.dart';
 import 'package:workout/views/signup_page.dart';
 
@@ -48,6 +48,45 @@ class _LoginPageState extends State<LoginPage> {
         }
       }
     } catch (e){
+      if (e is FirebaseAuthException) {
+        if (e.code == 'user-not-found') {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            backgroundColor: Colors.grey[700],
+            content:
+            Center(child: Text("Invalid Email or Phone Number!",style: GoogleFonts.quicksand(
+                fontSize: 14, fontWeight: FontWeight.bold),
+            ),),
+            duration: const Duration(seconds: 2),
+          ));
+        } else if (e.code == 'wrong-password') {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            backgroundColor: Colors.grey[700],
+            content:
+            Center(child: Text("Wrong Password",style: GoogleFonts.quicksand(
+                fontSize: 14, fontWeight: FontWeight.bold),
+            ),),
+            duration: const Duration(seconds: 2),
+          ));
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            backgroundColor: Colors.grey[700],
+            content:
+            Center(child: Text("Error occurred",style: GoogleFonts.quicksand(
+                fontSize: 14, fontWeight: FontWeight.bold),
+            ),),
+            duration: const Duration(seconds: 2),
+          ));
+        }
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          backgroundColor: Colors.grey[700],
+          content:
+          Center(child: Text("Error occurred",style: GoogleFonts.quicksand(
+              fontSize: 14, fontWeight: FontWeight.bold),
+          ),),
+          duration: const Duration(seconds: 2),
+        ));
+      }
       setState(() {
         isLoading = false;
       });

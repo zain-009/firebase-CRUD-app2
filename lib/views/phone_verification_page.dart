@@ -7,6 +7,7 @@ import 'package:workout/views/phone_signup_page.dart';
 class PhoneVerificationPage extends StatefulWidget {
   final String phoneNumber;
   final String verificationId;
+  final bool fromPhonePasswordReset = false;
 
   const PhoneVerificationPage(
       {super.key, required this.verificationId, required this.phoneNumber});

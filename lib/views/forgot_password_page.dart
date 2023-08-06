@@ -2,7 +2,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:workout/views/login_page.dart';
+import 'package:workout/views/phone_verification_page.dart';
 
 class ForgotPasswordPage extends StatefulWidget {
   const ForgotPasswordPage({super.key});
@@ -13,39 +15,104 @@ class ForgotPasswordPage extends StatefulWidget {
 
 class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   final _emailController = TextEditingController();
+  final _phoneNumberController = TextEditingController();
   bool isLoading = false;
+  var phoneNumber = "";
 
-  Future passwordReset() async {
+  Future emailPasswordReset() async {
     setState(() {
       isLoading = true;
     });
     try {
-      await FirebaseAuth.instance.sendPasswordResetEmail(
-          email: _emailController.text.trim());
+      await FirebaseAuth.instance
+          .sendPasswordResetEmail(email: _emailController.text.trim());
       setState(() {
         isLoading = false;
       });
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         backgroundColor: Colors.grey[700],
-        content:
-        Center(child: Text("Password reset link sent!",style: GoogleFonts.quicksand(
-            fontSize: 14, fontWeight: FontWeight.bold),
-        ),),
+        content: Center(
+          child: Text(
+            "Password reset link sent!",
+            style: GoogleFonts.quicksand(
+                fontSize: 14, fontWeight: FontWeight.bold),
+          ),
+        ),
         duration: const Duration(seconds: 2),
       ));
-      await Future.delayed(const Duration(seconds: 2));
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => LoginPage()));
+      Navigator.pushReplacement(
+          context, MaterialPageRoute(builder: (context) => LoginPage()));
     } on FirebaseAuthException catch (e) {
+      if (e is FirebaseAuthException) {
+        if (e.code == 'user-not-found') {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            backgroundColor: Colors.grey[700],
+            content: Center(
+              child: Text(
+                "Invalid Email",
+                style: GoogleFonts.quicksand(
+                    fontSize: 14, fontWeight: FontWeight.bold),
+              ),
+            ),
+            duration: const Duration(seconds: 2),
+          ));
+        }
+      }
       setState(() {
         isLoading = false;
       });
-      showDialog(
-          context: context, builder: (context) {
-        return AlertDialog(
-          content: Text(e.message.toString()),
-        );
-      }
+    }
+  }
+
+  Future<void> phonePasswordReset () async {
+    setState(() {
+      isLoading = true;
+    });
+    try {
+      await FirebaseAuth.instance.verifyPhoneNumber(
+          phoneNumber: phoneNumber,
+          verificationCompleted: (_) {},
+          verificationFailed: (e) {
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content: Text(e.toString()),
+              duration: const Duration(seconds: 2),
+            ));
+          },
+          codeSent: (String verificationId, int? token){
+            setState(() {
+              isLoading = false;
+            });
+            Navigator.push(context, MaterialPageRoute(builder: (context) => PhoneVerificationPage(verificationId: verificationId,phoneNumber: phoneNumber,)));
+          },
+          codeAutoRetrievalTimeout: (_){}
       );
+    } catch (e) {
+      if(e is FirebaseAuthException) {
+
+      }
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  Future<void> checkField () async {
+    if(_emailController.text.isNotEmpty && _phoneNumberController.text.isEmpty) {
+      emailPasswordReset();
+    } else if(_phoneNumberController.text.isNotEmpty && _emailController.text.isEmpty) {
+      phonePasswordReset();
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        backgroundColor: Colors.grey[700],
+        content: Center(
+          child: Text(
+            "Please fill out one field only!",
+            style: GoogleFonts.quicksand(
+                fontSize: 14, fontWeight: FontWeight.bold),
+          ),
+        ),
+        duration: const Duration(seconds: 2),
+      ));
     }
   }
 
@@ -80,8 +147,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
               children: [
                 SizedBox(
                     height: 200,
-                    child: SvgPicture.asset('assets/forgot_password.svg')
-                ),
+                    child: SvgPicture.asset('assets/forgot_password.svg')),
                 const SizedBox(
                   height: 30,
                 ),
@@ -99,26 +165,78 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                   height: 15,
                 ),
                 Text(
-                  "Don\'t worry, Please enter the address associated with your account",
+                  "Don\'t worry, Please enter the details associated with your account",
                   style: GoogleFonts.quicksand(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      color: Colors.grey[500]),),
+                      color: Colors.grey[500]),
+                ),
                 const SizedBox(
-                  height: 30,
+                  height: 20,
                 ),
                 TextFormField(
                   controller: _emailController,
+                  onFieldSubmitted: (_){_phoneNumberController.clear();},
                   decoration: const InputDecoration(
-                      icon: Icon(Icons.alternate_email),
-                      hintText: 'Email'),
+                      icon: Icon(Icons.alternate_email), hintText: 'Email'),
                 ),
                 const SizedBox(
-                  height: 40,
+                  height: 20,
+                ),
+                Row(
+                  //mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Expanded(
+                        child: Divider(
+                      indent: 60,
+                      height: 5,
+                      thickness: 2,
+                      color: Colors.black,
+                      endIndent: 10,
+                    )),
+                    Text(
+                      "Or",
+                      style: GoogleFonts.quicksand(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black),
+                    ),
+                    const Expanded(
+                        child: Divider(
+                      endIndent: 60,
+                      height: 5,
+                      thickness: 2,
+                      color: Colors.black,
+                      indent: 10,
+                    )),
+                  ],
+                ),
+                const SizedBox(
+                  height: 20,
+                ),
+                IntlPhoneField(
+                  controller: _phoneNumberController,
+                  disableLengthCheck: true,
+                  style: const TextStyle(fontSize: 18),
+                  decoration: const InputDecoration(
+                    hintText: 'Phone Number',
+                    labelText: null,
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide(),
+                    ),
+                  ),
+                  initialCountryCode: 'PK',
+                  onChanged: (phone) {
+                    phoneNumber = phone.completeNumber;
+                  },
+                  onSubmitted: (_){_emailController.clear();},
+                ),
+                const SizedBox(
+                  height: 20,
                 ),
                 GestureDetector(
                   onTap: () {
-                    passwordReset();
+                    checkField();
                   },
                   child: Container(
                     decoration: BoxDecoration(
@@ -128,13 +246,17 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                     height: 50,
                     width: double.infinity,
                     child: Center(
-                        child: isLoading? const CircularProgressIndicator(color: Colors.white,) : Text(
-                          "Submit",
-                          style: GoogleFonts.quicksand(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white),
-                        )),
+                        child: isLoading
+                            ? const CircularProgressIndicator(
+                                color: Colors.white,
+                              )
+                            : Text(
+                                "Submit",
+                                style: GoogleFonts.quicksand(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white),
+                              )),
                   ),
                 ),
               ],
@@ -145,4 +267,3 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     );
   }
 }
-

@@ -18,10 +18,10 @@ class _SignUpPageState extends State<SignUpPage> {
   final _ageController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-
+  bool isVisible = true;
   bool isLoading = false;
 
-  Future signUp() async {
+  Future<void> signUp() async {
     setState(() {
       isLoading = true;
     });
@@ -79,6 +79,45 @@ class _SignUpPageState extends State<SignUpPage> {
       'age': age,
       'email': email,
     });
+  }
+
+  Future<void> checkAvailability () async {
+    if(_firstNameController.text == "" || _lastNameController.text == "" || _ageController.text == "" || _emailController.text == "" || _passwordController.text == ""){
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        backgroundColor: Colors.grey[700],
+        content:
+        Center(child: Text("Please Enter all Details!",style: GoogleFonts.quicksand(
+            fontSize: 14, fontWeight: FontWeight.bold),
+        ),),
+        duration: const Duration(seconds: 2),
+      ));
+    } else {
+      try {
+        String email = _emailController.text.trim();
+        List<String> available = await FirebaseAuth.instance.fetchSignInMethodsForEmail(email);
+        if(available.isNotEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            backgroundColor: Colors.grey[700],
+            content:
+            Center(child: Text("Email already in Use!",style: GoogleFonts.quicksand(
+                fontSize: 14, fontWeight: FontWeight.bold),
+            ),),
+            duration: const Duration(seconds: 2),
+          ));
+        } else {
+          signUp();
+        }
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          backgroundColor: Colors.grey[700],
+          content:
+          Center(child: Text(e.toString(),style: GoogleFonts.quicksand(
+              fontSize: 14, fontWeight: FontWeight.bold),
+          ),),
+          duration: const Duration(seconds: 2),
+        ));
+      }
+    }
   }
 
   @override
@@ -230,11 +269,17 @@ class _SignUpPageState extends State<SignUpPage> {
                   child: Padding(
                     padding: const EdgeInsets.only(left: 10),
                     child: TextField(
-                      obscureText: true,
+                      obscureText: isVisible,
                       controller: _passwordController,
-                      decoration: const InputDecoration(
-                        hintText: 'Password',
+                      decoration: InputDecoration(
                         border: InputBorder.none,
+                          icon: const Icon(Icons.lock_outline), hintText: 'Password',
+                          prefixIcon: null,
+                          suffixIcon: IconButton(onPressed: (){
+                            setState(() {
+                              isVisible = !isVisible;
+                            });
+                          }, icon: isVisible? const Icon(Icons.visibility_off) : const Icon(Icons.visibility))
                       ),
                     ),
                   ),
@@ -244,7 +289,7 @@ class _SignUpPageState extends State<SignUpPage> {
                 ),
                 GestureDetector(
                   onTap: () {
-                    signUp();
+                    checkAvailability();
                   },
                   child: Container(
                     decoration: BoxDecoration(

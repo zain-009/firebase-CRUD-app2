@@ -17,6 +17,34 @@ class _PhoneLoginPageState extends State<PhoneLoginPage> {
   bool isLoading = false;
   final auth = FirebaseAuth.instance;
 
+  Future<void> checkAvailability (String phoneNumber) async {
+    try {
+      String email = "${phoneNumber.toString().trim()}@gmail.com";
+      List<String> available = await FirebaseAuth.instance.fetchSignInMethodsForEmail(email);
+      if(available.isNotEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          backgroundColor: Colors.grey[700],
+          content:
+          Center(child: Text("Phone Number Already in Use!",style: GoogleFonts.quicksand(
+              fontSize: 14, fontWeight: FontWeight.bold),
+          ),),
+          duration: const Duration(seconds: 2),
+        ));
+      } else {
+        //auth.setSettings(appVerificationDisabledForTesting: true);
+        sendCode();
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        backgroundColor: Colors.grey[700],
+        content:
+        Center(child: Text(e.toString(),style: GoogleFonts.quicksand(
+            fontSize: 14, fontWeight: FontWeight.bold),
+        ),),
+        duration: const Duration(seconds: 2),
+      ));
+    }
+  }
   Future<void> sendCode() async {
     setState(() {
       isLoading = true;
@@ -26,8 +54,8 @@ class _PhoneLoginPageState extends State<PhoneLoginPage> {
           phoneNumber: phoneNumber,
           verificationCompleted: (_) {},
           verificationFailed: (e) {
-            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-              content: Text("Verification Failed!"),
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content: Text(e.toString()),
               duration: Duration(seconds: 2),
             ));
           },
@@ -89,7 +117,7 @@ class _PhoneLoginPageState extends State<PhoneLoginPage> {
               ),
               GestureDetector(
                 onTap: () async {
-                  sendCode();
+                  checkAvailability(phoneNumber);
                 },
                 child: Container(
                   decoration: BoxDecoration(

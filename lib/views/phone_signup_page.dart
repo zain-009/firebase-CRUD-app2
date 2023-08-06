@@ -19,6 +19,7 @@ class _PhoneSignupPageState extends State<PhoneSignupPage> {
   final _ageController = TextEditingController();
   final _passwordController = TextEditingController();
   bool isLoading = false;
+  bool isVisible = true;
 
 
   Future<void> signUp() async {
@@ -202,11 +203,16 @@ class _PhoneSignupPageState extends State<PhoneSignupPage> {
                   child: Padding(
                     padding: const EdgeInsets.only(left: 10),
                     child: TextField(
-                      obscureText: true,
+                      obscureText: isVisible,
                       controller: _passwordController,
-                      decoration: const InputDecoration(
-                        hintText: 'Password',
-                        border: InputBorder.none,
+                      decoration: InputDecoration(
+                          border: InputBorder.none,
+                          icon: const Icon(Icons.lock_outline), hintText: 'Password',
+                          suffixIcon: IconButton(onPressed: (){
+                            setState(() {
+                              isVisible = !isVisible;
+                            });
+                          }, icon: isVisible? const Icon(Icons.visibility_off) : const Icon(Icons.visibility))
                       ),
                     ),
                   ),
