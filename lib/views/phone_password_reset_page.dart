@@ -1,6 +1,8 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:workout/views/login_page.dart';
 
 class PhonePasswordResetPage extends StatefulWidget {
   const PhonePasswordResetPage({super.key});
@@ -16,7 +18,42 @@ class _PhonePasswordResetPageState extends State<PhonePasswordResetPage> {
 
 
   Future<void> resetPassword () async {
-
+    setState(() {
+      isLoading = true;
+    });
+    try {
+      await FirebaseAuth.instance.currentUser?.updatePassword(_passwordController.text.trim());
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        backgroundColor: Colors.grey[700],
+        content: Center(
+          child: Text(
+            "Password reset Successful",
+            style: GoogleFonts.quicksand(
+                fontSize: 14, fontWeight: FontWeight.bold),
+          ),
+        ),
+        duration: const Duration(seconds: 2),
+      ));
+      setState(() {
+        isLoading = false;
+      });
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const LoginPage()));
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        backgroundColor: Colors.grey[700],
+        content: Center(
+          child: Text(
+            e.toString(),
+            style: GoogleFonts.quicksand(
+                fontSize: 14, fontWeight: FontWeight.bold),
+          ),
+        ),
+        duration: const Duration(seconds: 2),
+      ));
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
 
   @override
